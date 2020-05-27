@@ -8,6 +8,7 @@ TagManager:
   - Ball
   - Block
   - Wall
+  - Bounds
   layers:
   - Default
   - TransparentFX

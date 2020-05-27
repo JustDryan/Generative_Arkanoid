@@ -20,6 +20,8 @@ public class BlockComponent : MonoBehaviour
         {
             SetColour(healthColours[0]);
             gameObject.tag = "Wall";
+            if (LevelController.levelController != null)
+                LevelController.levelController.RemoveBlock(gameObject);
             Destroy(this);
         }
     }
@@ -30,7 +32,11 @@ public class BlockComponent : MonoBehaviour
         SetColour(healthColours[health]);
 
         if (health <= 0)
+        {
+            if (LevelController.levelController != null)
+                LevelController.levelController.RemoveBlock(gameObject);
             Destroy(gameObject);
+        }
     }
 
     public void SetMaxHealth(int h)

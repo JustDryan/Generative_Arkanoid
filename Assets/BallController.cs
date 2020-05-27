@@ -15,11 +15,15 @@ public class BallController : MonoBehaviour
     float prevX;
     GameObject prevCollision;
 
+    Vector3 spawnPos;
+
     Rigidbody2D rb;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        SetBallRotation(180);
+        spawnPos = transform.position;
     }
 
     void Update()
@@ -27,6 +31,13 @@ public class BallController : MonoBehaviour
         rb.velocity = transform.up * ballSpeed;
 
         prevX = transform.position.x;
+    }
+
+    public void RespawnBall()
+    {
+        transform.position = spawnPos;
+        SetBallRotation(180);
+        prevCollision = null;
     }
 
     public int GetDirection()
@@ -131,5 +142,8 @@ public class BallController : MonoBehaviour
             PlayHitSound(false);
             prevCollision = collision.gameObject;
         }
+
+        if (collision.gameObject.CompareTag("Bounds"))
+            RespawnBall();
     }
 }

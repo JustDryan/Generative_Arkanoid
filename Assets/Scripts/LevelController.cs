@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class LevelController : MonoBehaviour
 {
+    public static LevelController levelController;
+
     public string seed;
 
     public Vector2 generateStart;
@@ -12,6 +14,9 @@ public class LevelController : MonoBehaviour
     public GameObject blockPrefab;
 
     public List<BlockColumn> columns = new List<BlockColumn>();
+    List<GameObject> blocks = new List<GameObject>();
+
+    bool gameOver;
 
     [System.Serializable]
     public class BlockColumn
@@ -127,6 +132,11 @@ public class LevelController : MonoBehaviour
 
     void Start()
     {
+        if (levelController == null)
+            levelController = this;
+        else
+            Destroy(gameObject);
+
         if (seed != "")
             Random.InitState(seed.GetHashCode());
 
@@ -148,6 +158,14 @@ public class LevelController : MonoBehaviour
             }
             columns.Add(newColumn);
         }
+
+        SetBlockList();
+    }
+
+    private void Update()
+    {
+        if (blocks.Count == 0)
+            print("Yay nice");
     }
 
     public void CreateColourSet()
@@ -209,5 +227,20 @@ public class LevelController : MonoBehaviour
         }
         blockPrefab.GetComponent<BlockComponent>().SetColours(colors.ToArray());
         Camera.main.backgroundColor = colors[3];
+    }
+
+    public void SetBlockList()
+    {
+        GameObject[] b = GameObject.FindGameObjectsWithTag("Block");
+        for (int i = 0; i < b.Length; i++)
+        {
+            blocks.Add(b[i]);
+        }
+    }
+
+    public void RemoveBlock(GameObject g)
+    {
+        if (blocks.Contains(g))
+            blocks.Remove(g);
     }
 }
