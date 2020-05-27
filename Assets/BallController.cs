@@ -98,10 +98,18 @@ public class BallController : MonoBehaviour
         {
             if (transform.position.y >= 2)
                 aud.clip = clips[3];
-            else if (transform.position.y >= 1)
+            else if (transform.position.y >= 1f)
+                aud.clip = clips[7];
+            else if (transform.position.y >= 0f)
                 aud.clip = clips[2];
-            else
+            else if (transform.position.y >= -1f)
+                aud.clip = clips[6];
+            else if (transform.position.y >= -2f)
                 aud.clip = clips[1];
+            else if (transform.position.y >= -3f)
+                aud.clip = clips[5];
+            else
+                aud.clip = clips[4];
         }
         if (aud.clip != null)
         {

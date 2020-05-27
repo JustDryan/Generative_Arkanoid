@@ -164,8 +164,11 @@ public class LevelController : MonoBehaviour
 
     private void Update()
     {
-        if (blocks.Count == 0)
+        if (blocks.Count == 0 && !gameOver)
+        {
+            gameOver = true;
             print("Yay nice");
+        }
     }
 
     public void CreateColourSet()
