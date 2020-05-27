@@ -8,54 +8,46 @@ public class PlayerController : MonoBehaviour
     public float squashAmount;
 
     float paddleX;
-    int direction;
 
     Vector3 previousPostion;
     Transform graphic;
 
     void Start()
     {
-        paddleX = 1;
-        previousPostion = transform.position;
-        graphic = transform.GetChild(0);
+        paddleX = 1; //Sets the length of the Paddle
+        previousPostion = transform.position; //Sets the starting position to measure speed
+        graphic = transform.GetChild(0); //Sets the paddle sprite parent
     }
 
     void Update()
     {
-        PaddlePosition();
+        PaddlePosition(); //Updates the Paddle's position
     }
 
     private void FixedUpdate()
     {
-        float paddleY = 1 - (GetSpeed()/2);
-        if (paddleY >= 0.5f)
+        //Below is the code used to squash the paddle if it starts moving quickly, a lot of it is adjusted for visual clarity
+
+        float paddleY = 1 - (GetSpeed()/2); //Gets a y value for the Paddle's y scale dependant on the Paddle's speed
+        if (paddleY >= 0.5f) //If the value doesn't reach the threshold, leave the paddle thickness alone
             paddleY = 1;
-        if (paddleY <= 0.2f)
+        if (paddleY <= 0.2f) //If the value is too small, clamp to the lowest value I've determined
             paddleY = 0.2f;
-        Vector2 targetScale = new Vector2(paddleX, paddleY);
-        graphic.localScale = Vector2.Lerp(graphic.localScale, targetScale, 50 * Time.deltaTime);
-        CheckDirection();
-        previousPostion = transform.position;
+        Vector2 targetScale = new Vector2(paddleX, paddleY); //Creates a Vector2 to Lerp to
+        graphic.localScale = Vector2.Lerp(graphic.localScale, targetScale, 50 * Time.deltaTime); //Lerps the localScale to that Vector2
+        previousPostion = transform.position; //Updates previous position to be used to calculate speed
     }
 
     void PaddlePosition()
     {
-        Vector3 mousePos = Input.mousePosition;
-        mousePos.z = 10;
-        Vector3 input = Camera.main.ScreenToWorldPoint(mousePos);
-        input.x = Mathf.Clamp(input.x, -minMaxParams, minMaxParams);
-        transform.position = new Vector3(input.x, transform.position.y);
+        Vector3 mousePos = Input.mousePosition; //Gets mouse position
+        mousePos.z = 10; //Adds z as mousePosition defaults to camera position
+        Vector3 input = Camera.main.ScreenToWorldPoint(mousePos); //Generates a useable Vector3 in the world space
+        input.x = Mathf.Clamp(input.x, -minMaxParams, minMaxParams); //Prevents the Paddle from leaving the bounds of the game
+        transform.position = new Vector3(input.x, transform.position.y); //Sets the paddle position
     }
 
-    void CheckDirection()
-    {
-        if (previousPostion.x > transform.position.x)
-            direction = -1;
-        else if (previousPostion.x < transform.position.x)
-            direction = 1;
-    }
-
-    float GetSpeed()
+    float GetSpeed() //Checks how quickly the paddle is moving by comparing its current position with its last physics frame position
     {
         float speed = Vector3.Distance(transform.position, previousPostion);
         return speed;

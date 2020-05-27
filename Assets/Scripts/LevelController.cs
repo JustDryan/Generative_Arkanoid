@@ -19,7 +19,7 @@ public class LevelController : MonoBehaviour
     bool gameOver;
 
     [System.Serializable]
-    public class BlockColumn
+    public class BlockColumn //The column class
     {
         public List<Transform> blocks = new List<Transform>();
         public float baseY;
@@ -28,39 +28,42 @@ public class LevelController : MonoBehaviour
 
         public BlockColumn(float x, float y, int length)
         {
-            baseY = y;
-            xValue = x;
-            columnLength = length;
+            baseY = y; //Sets the starting heigh for generation
+            xValue = x; //Sets the horizontal position of the column, this does not change
+            columnLength = length; //Sets how many blocks the column will generate
         }
 
-        public void SetBlockList(List<Transform> list)
+        public void GenerateColoumn(GameObject prefab, Vector2 spacing) //Generates a brand new column
         {
-            for (int i = 0; i < list.Count; i++)
+            for (int i = 0; i < columnLength; i++) //For how long the column is
             {
-                Transform newBlock = Instantiate(list[i].gameObject, new Vector2(xValue, list[i].transform.position.y), Quaternion.identity).transform;
-                newBlock.position = new Vector2(xValue, list[i].transform.position.y);
-                if (list[i].GetComponent<BlockComponent>().maxHealth == 0)
-                    newBlock.GetComponent<BlockComponent>().SetWall();
-                newBlock.GetComponent<BlockComponent>().SetOpacity(1 - (i * 0.1f));
-                blocks.Add(newBlock);
+                Transform newBlock = Instantiate(prefab, new Vector2(xValue, baseY), Quaternion.identity).transform; //Creates a new block using the blockPrefab
+                newBlock.position = new Vector2(xValue, baseY) + new Vector2(0, spacing.y * -i); //Sets the position of this new block to the xValue and adjusts the height dependant on which number in the list it is and how much spacing is being applied
+                BlockTypeCalculation(i, newBlock.GetComponent<BlockComponent>()); //Rolls the block type, setting max health and whether or not the block is a wall
+                newBlock.GetComponent<BlockComponent>().SetOpacity(1 - (i * 0.1f)); //Sets the block's opacity variable depending how high it is, higher = more opaque
+                blocks.Add(newBlock); //Adds this block to the column's list of blocks
             }
         }
 
-        public void GenerateColoumn(GameObject prefab, Vector2 spacing)
+        public void SetBlockList(List<Transform> list) //Copies another column using the other column's block list
         {
-            for (int i = 0; i < columnLength; i++)
+            for (int i = 0; i < list.Count; i++)
             {
-                Transform newBlock = Instantiate(prefab, new Vector2(xValue, baseY), Quaternion.identity).transform;
-                newBlock.position = new Vector2(xValue, baseY) + new Vector2(0, spacing.y * -i);
-                BlockTypeCalculation(i, newBlock.GetComponent<BlockComponent>());
-                newBlock.GetComponent<BlockComponent>().SetOpacity(1 - (i * 0.1f));
-                blocks.Add(newBlock);
+                Transform newBlock = Instantiate(list[i].gameObject, new Vector2(xValue, list[i].transform.position.y), Quaternion.identity).transform; //Creates a new block using the other list's block as a base
+                newBlock.position = new Vector2(xValue, list[i].transform.position.y); //Sets the position, only changing the xValue to the current column's xValue
+                if (list[i].GetComponent<BlockComponent>().maxHealth == 0) //Checks if the block being copied is a wall and sets this block to also be a wall
+                    newBlock.GetComponent<BlockComponent>().SetWall();
+                newBlock.GetComponent<BlockComponent>().SetOpacity(1 - (i * 0.1f)); //Sets the block's opacity variable depending how high it is, higher = more opaque
+                blocks.Add(newBlock); //Adds this block to the column's list of blocks
             }
         }
 
         void BlockTypeCalculation(int order, BlockComponent block)
         {
             int roll = Random.Range(0, 100);
+
+            //Calculations on block health/wall settings are done of one roll. The roll's chances change depending on how high up thhe screen the block is, if the higher the block, the more likely the max health will be higher
+            //All rolls have a very chance to be walls
 
             if(order < 2)
             {
@@ -132,68 +135,74 @@ public class LevelController : MonoBehaviour
 
     void Start()
     {
-        Cursor.visible = false;
+        Cursor.visible = false; //Removes the cursor
 
-        if (levelController == null)
+        if (levelController == null) //Sets the singleton if one doesn't exist
             levelController = this;
-        else
+        else //If one does exists, destroys this instance
             Destroy(gameObject);
 
-        GenerateNewLevel();
+        GenerateNewLevel(); //Generates a new set of blocks
     }
 
     [ContextMenu("Generate New Level")]
-    public void GenerateNewLevel()
+    public void GenerateNewLevel() //Generates a new set of blocks
     {
-        if (seed != "")
+        if (seed != "") //If there is a seed, generate a hashcode from it
             Random.InitState(seed.GetHashCode());
-        else
+        else //If there is no seed, use the current game time as a seed
             Random.InitState(Mathf.FloorToInt(Time.time));
 
-        DestroyBlockList();
+        DestroyBlockList(); //Destroys all previous blocks if there are some
 
-        CreateColourSet();
-        columns = new List<BlockColumn>();
-        int heldIndex = 3;
+        CreateColourSet(); //Creates a new colour palette
+        columns = new List<BlockColumn>(); //Resets the column list
+        int heldIndex = 3; //This index is used to mirror the columns
         for (int i = 0; i < 8; i++)
         {
-            int columnLength = Random.Range(2, 8);
-            BlockColumn newColumn = new BlockColumn(generateStart.x + (spacing.x * i), generateStart.y, columnLength);
-            if (i <= 3)
+            int columnLength = Random.Range(2, 8); //Sets a random column length, maximum of 7, minimum of 2
+            BlockColumn newColumn = new BlockColumn(generateStart.x + (spacing.x * i), generateStart.y, columnLength); //Create a new column
+            if (i <= 3) //First half
             {
-                newColumn.GenerateColoumn(blockPrefab, spacing);
+                newColumn.GenerateColoumn(blockPrefab, spacing); //Populate the new column with random blocks
             }
-            else
+            else //Second half
             {
-                newColumn.SetBlockList(columns[heldIndex].blocks);
-                heldIndex--;
+                newColumn.SetBlockList(columns[heldIndex].blocks); //Copy the selected column
+                heldIndex--; //Work down the list to mirror the columns
             }
-            columns.Add(newColumn);
+            columns.Add(newColumn); //Adds the new column to the list
         }
 
-        SetBlockList();
+        SetBlockList(); //Generates a list of all destroyable blocks
     }
 
     private void Update()
     {
-        if (blocks.Count == 0 && !gameOver)
+        if (blocks.Count == 0 && !gameOver) //If there are no more destroyable blocks (if the block list is empty) and the game isn't over
         {
-            gameOver = true;
+            gameOver = true; //End the game
             print("Yay nice");
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space)) //Generate a new level on space press
             GenerateNewLevel();
     }
 
     public void CreateColourSet()
     {
-        Color baseColor = new Color(Random.Range(0f, 25500f) / 25500f, Random.Range(0f, 25500f) / 25500f, Random.Range(0f, 25500f) / 25500f);
+        //This function generates a base colour and then attempts to mirror a tetradic colour theory e.g: Base Colour = R:255, G:40, B:10
+        //From the base colour we keep the highest value and reverse the other two thus creating a second colour e.g: Base Colour = R:255, G:10, B:40
+        //For the third colour we swap the highest and lowest values, then reverse the third value e.g: Base Colour = R:10, G:215, B:255
+        //For the final fourth colour we repeat the second step with the third step e.g: Base Colour = R:215, G:10, B:255
+        //This creates four colours in a list. The list positions are then shuffled and elements 0-2 are set as block colours, whilst the final element 3 is set as the camera colour
 
-        List<Color> colors = new List<Color>();
-        colors.Add(baseColor);
+        Color baseColor = new Color(Random.Range(0f, 25500f) / 25500f, Random.Range(0f, 25500f) / 25500f, Random.Range(0f, 25500f) / 25500f); //Sets base
 
-        if(baseColor.r >= baseColor.b && baseColor.r >= baseColor.g)
+        List<Color> colors = new List<Color>(); //Creates a new list of colours
+        colors.Add(baseColor); //Adds the base colour
+
+        if(baseColor.r >= baseColor.b && baseColor.r >= baseColor.g) //Steps 2-4 are done here if red is highest
         {
             colors.Add(new Color(baseColor.r, baseColor.b, baseColor.g));
             if (baseColor.b > baseColor.g)
@@ -207,7 +216,7 @@ public class LevelController : MonoBehaviour
                 colors.Add(new Color(1 - baseColor.b, baseColor.r, baseColor.g));
             }
         }
-        else if (baseColor.b >= baseColor.r && baseColor.b >= baseColor.g)
+        else if (baseColor.b >= baseColor.r && baseColor.b >= baseColor.g) //Steps 2-4 are done here if blue is highest
         {
             colors.Add(new Color(baseColor.g, baseColor.r, baseColor.b));
             if (baseColor.r > baseColor.g)
@@ -221,7 +230,7 @@ public class LevelController : MonoBehaviour
                 colors.Add(new Color(1 - baseColor.g, baseColor.r, baseColor.b));
             }
         }
-        else if (baseColor.g >= baseColor.r && baseColor.g >= baseColor.b)
+        else if (baseColor.g >= baseColor.r && baseColor.g >= baseColor.b) //Steps 2-4 are done here if green is highest
         {
             colors.Add(new Color(baseColor.b, baseColor.r, baseColor.g));
             if (baseColor.b > baseColor.r)
@@ -236,20 +245,20 @@ public class LevelController : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < colors.Count; i++)
+        for (int i = 0; i < colors.Count; i++) //Randomly distributes the colours in the list
         {
             Color storedColor = colors[i];
             int randomRoll = Random.Range(0, colors.Count);
             colors[i] = colors[randomRoll];
             colors[randomRoll] = storedColor;
         }
-        blockPrefab.GetComponent<BlockComponent>().SetColours(colors.ToArray());
-        Camera.main.backgroundColor = colors[3];
+        blockPrefab.GetComponent<BlockComponent>().SetColours(colors.ToArray()); //Sets the block colours
+        Camera.main.backgroundColor = colors[3]; //Sets the background colour
     }
 
     public void DestroyBlockList()
     {
-        if (blocks.Count > 0)
+        if (blocks.Count > 0) //If there are blocks in the list, destroy all blocks
         {
             foreach (GameObject block in blocks)
             {
@@ -257,35 +266,30 @@ public class LevelController : MonoBehaviour
             }
         }
 
-        GameObject[] blockWalls = GameObject.FindGameObjectsWithTag("BlockWall");
-        foreach (GameObject bW in blockWalls)
+        GameObject[] blockWalls = GameObject.FindGameObjectsWithTag("BlockWall"); //Find all block walls
+        if (blockWalls.Length > 0) //If any block walls are found, destroy them
         {
-            Destroy(bW);
+            foreach (GameObject bW in blockWalls)
+            {
+                Destroy(bW);
+            }
         }
 
-        blocks = new List<GameObject>();
+        blocks = new List<GameObject>(); //Create a new block list
     }
 
     public void SetBlockList()
     {
-        if(blocks.Count > 0)
-        {
-            foreach (GameObject block in blocks)
-            {
-                Destroy(block);
-            }
-        }
+        DestroyBlockList(); //Precautionary list destruction
 
-        blocks = new List<GameObject>();
-
-        GameObject[] b = GameObject.FindGameObjectsWithTag("Block");
+        GameObject[] b = GameObject.FindGameObjectsWithTag("Block"); //Find all the blocks in the level
         for (int i = 0; i < b.Length; i++)
         {
-            blocks.Add(b[i]);
+            blocks.Add(b[i]); //Add them to the main list
         }
     }
 
-    public void RemoveBlock(GameObject g)
+    public void RemoveBlock(GameObject g) //Called when a block is destroyed, removes it from the list if it is in the list
     {
         if (blocks.Contains(g))
             blocks.Remove(g);
