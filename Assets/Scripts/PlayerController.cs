@@ -11,6 +11,8 @@ public class PlayerController : MonoBehaviour
     Vector3 previousPostion; //Previous position of Paddle, updates at the end of every physics frame
     Transform graphic; //Parent graphic for paddle, used to squash paddle without altering the collider
 
+    bool paddleActive;
+
     void Start()
     {
         paddleX = 1; //Sets the length of the Paddle
@@ -20,6 +22,9 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (!paddleActive)
+            return;
+
         PaddlePosition(); //Updates the Paddle's position
     }
 
@@ -50,6 +55,11 @@ public class PlayerController : MonoBehaviour
     {
         float speed = Vector3.Distance(transform.position, previousPostion);
         return speed;
+    }
+
+    public void SetPaddleActive(bool b)
+    {
+        paddleActive = b;
     }
 
 }

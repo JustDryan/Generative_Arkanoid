@@ -27,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1349120649769229089}
   m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
-  m_LocalPosition: {x: 0, y: -2.5600002, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1349120650425154885}
@@ -86,10 +86,7 @@ MonoBehaviour:
   ballSpeed: 8
   maxBallSpeed: 12
   ballSpeedIncrease: 0.1
-  clips:
-  - {fileID: 8300000, guid: 3efb06f3ec215bd42b74e048da6ebba4, type: 3}
-  - {fileID: 8300000, guid: 975dfc3b2c00acb4b829b9a0f6fa242b, type: 3}
-  - {fileID: 8300000, guid: a3eb047bcbe7b2b4ebe136c518f1f7d6, type: 3}
+  clip: {fileID: 8300000, guid: 3efb06f3ec215bd42b74e048da6ebba4, type: 3}
 --- !u!1 &1349120650425154884
 GameObject:
   m_ObjectHideFlags: 0

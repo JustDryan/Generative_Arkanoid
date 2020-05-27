@@ -7,6 +7,7 @@ public class LevelController : MonoBehaviour
     public static LevelController levelController; //Level Controller singleton
 
     public string seed; //Seed to generate from
+    [HideInInspector]public string randomSeed; //Stores the randomly generated seeds
 
     public Vector2 generateStart; //Position to start generating at (top left)
     public Vector2 spacing; //Spacing between blocks on x/y
@@ -16,6 +17,7 @@ public class LevelController : MonoBehaviour
     public List<BlockColumn> columns = new List<BlockColumn>(); //List of columns, used to mirror
     List<GameObject> blocks = new List<GameObject>(); //List of destroyable blocks in game, goes down every time a block is destroyed, used to complete game
 
+    bool gameStarted;
     bool gameOver;
 
     [System.Serializable]
@@ -135,14 +137,10 @@ public class LevelController : MonoBehaviour
 
     void Start()
     {
-        Cursor.visible = false; //Removes the cursor
-
         if (levelController == null) //Sets the singleton if one doesn't exist
             levelController = this;
         else //If one does exists, destroys this instance
             Destroy(gameObject);
-
-        GenerateNewLevel(); //Generates a new set of blocks
     }
 
     [ContextMenu("Generate New Level")]
@@ -151,7 +149,10 @@ public class LevelController : MonoBehaviour
         if (seed != "") //If there is a seed, generate a hashcode from it
             Random.InitState(seed.GetHashCode());
         else //If there is no seed, use the current game time as a seed
-            Random.InitState(Mathf.FloorToInt(Time.time));
+        {
+            randomSeed = (Mathf.FloorToInt(Time.time + 1) * Random.Range(1, 4500)).ToString();
+            Random.InitState(randomSeed.GetHashCode());
+        }
 
         DestroyBlockList(); //Destroys all previous blocks if there are some
 
@@ -179,10 +180,11 @@ public class LevelController : MonoBehaviour
 
     private void Update()
     {
-        if (blocks.Count == 0 && !gameOver) //If there are no more destroyable blocks (if the block list is empty) and the game isn't over
+        if (blocks.Count == 0 && !gameOver && gameStarted) //If there are no more destroyable blocks (if the block list is empty) and the game isn't over
         {
-            gameOver = true; //End the game
-            print("Yay nice");
+            gameOver = true; //Prevent extra runs
+            gameStarted = false;
+            GameController.gameController.FinishGame(); //End the game
         }
 
         //if (Input.GetKeyDown(KeyCode.Space)) Generate a new level on space press, used for making my gif
@@ -293,5 +295,16 @@ public class LevelController : MonoBehaviour
     {
         if (blocks.Contains(g))
             blocks.Remove(g);
+    }
+
+    public void SetSeed(string s) //Sets seed to input string
+    {
+        seed = s;
+    }
+
+    public void StartGame()
+    {
+        gameStarted = true;
+        gameOver = false;
     }
 }

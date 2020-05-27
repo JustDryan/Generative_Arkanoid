@@ -68,6 +68,7 @@ public class SpriteTrail : MonoBehaviour
         if (!trailRunning)
             return;
         Transform newSprite = new GameObject("Trail", typeof(SpriteRenderer)).transform;
+        newSprite.tag = "Trail";
         newSprite.GetComponent<SpriteRenderer>().sprite = spriteRenderer.sprite;
         newSprite.GetComponent<SpriteRenderer>().color = spriteRenderer.color;
         newSprite.position = transform.position;

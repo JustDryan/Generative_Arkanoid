@@ -10,6 +10,7 @@ TagManager:
   - Wall
   - Bounds
   - BlockWall
+  - Trail
   layers:
   - Default
   - TransparentFX
