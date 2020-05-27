@@ -18,6 +18,7 @@ public class BallController : MonoBehaviour
     Vector3 spawnPos;
 
     Rigidbody2D rb;
+    int hitIndex;
 
     void Start()
     {
@@ -92,25 +93,26 @@ public class BallController : MonoBehaviour
     {
         AudioSource aud = new GameObject("BallHitClip", typeof(AudioSource)).GetComponent<AudioSource>();
         aud.volume = 0.5f;
-        if (paddle)
-            aud.clip = clips[0];
-        else
-        {
-            if (transform.position.y >= 2)
-                aud.clip = clips[3];
-            else if (transform.position.y >= 1f)
-                aud.clip = clips[7];
-            else if (transform.position.y >= 0f)
-                aud.clip = clips[2];
-            else if (transform.position.y >= -1f)
-                aud.clip = clips[6];
-            else if (transform.position.y >= -2f)
-                aud.clip = clips[1];
-            else if (transform.position.y >= -3f)
-                aud.clip = clips[5];
-            else
-                aud.clip = clips[4];
-        }
+        aud.clip = clips[hitIndex];
+        aud.pitch = Mathf.Pow(1.05946f, Mathf.Floor(transform.position.y + 3));
+        hitIndex++;
+        if (hitIndex >= clips.Length)
+            hitIndex = 0;
+        //if (paddle)
+        //    aud.clip = clips[0];
+        //else
+        //{
+        //    if (transform.position.y >= 1f)
+        //        aud.clip = clips[5];
+        //    else if (transform.position.y >= 0f)
+        //        aud.clip = clips[4];
+        //    else if (transform.position.y >= -1f)
+        //        aud.clip = clips[3];
+        //    else if (transform.position.y >= -2f)
+        //        aud.clip = clips[2];
+        //    else
+        //        aud.clip = clips[1];
+        //}
         if (aud.clip != null)
         {
             aud.Play();
@@ -151,7 +153,21 @@ public class BallController : MonoBehaviour
             prevCollision = collision.gameObject;
         }
 
+        if (collision.gameObject.CompareTag("BlockWall"))
+        {
+            ReflectBall(normal, 0);
+            PlayHitSound(false);
+            prevCollision = collision.gameObject;
+        }
+
         if (collision.gameObject.CompareTag("Bounds"))
             RespawnBall();
+
+        if (collision.gameObject.CompareTag("Ball"))
+        {
+            ReflectBall(normal, 0);
+            PlayHitSound(false);
+            prevCollision = collision.gameObject;
+        }
     }
 }

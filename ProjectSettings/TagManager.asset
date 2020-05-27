@@ -9,6 +9,7 @@ TagManager:
   - Block
   - Wall
   - Bounds
+  - BlockWall
   layers:
   - Default
   - TransparentFX

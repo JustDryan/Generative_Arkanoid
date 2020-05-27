@@ -132,16 +132,28 @@ public class LevelController : MonoBehaviour
 
     void Start()
     {
+        Cursor.visible = false;
+
         if (levelController == null)
             levelController = this;
         else
             Destroy(gameObject);
 
+        GenerateNewLevel();
+    }
+
+    [ContextMenu("Generate New Level")]
+    public void GenerateNewLevel()
+    {
         if (seed != "")
             Random.InitState(seed.GetHashCode());
+        else
+            Random.InitState(Mathf.FloorToInt(Time.time));
+
+        DestroyBlockList();
 
         CreateColourSet();
-
+        columns = new List<BlockColumn>();
         int heldIndex = 3;
         for (int i = 0; i < 8; i++)
         {
@@ -169,6 +181,9 @@ public class LevelController : MonoBehaviour
             gameOver = true;
             print("Yay nice");
         }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+            GenerateNewLevel();
     }
 
     public void CreateColourSet()
@@ -232,8 +247,37 @@ public class LevelController : MonoBehaviour
         Camera.main.backgroundColor = colors[3];
     }
 
+    public void DestroyBlockList()
+    {
+        if (blocks.Count > 0)
+        {
+            foreach (GameObject block in blocks)
+            {
+                Destroy(block);
+            }
+        }
+
+        GameObject[] blockWalls = GameObject.FindGameObjectsWithTag("BlockWall");
+        foreach (GameObject bW in blockWalls)
+        {
+            Destroy(bW);
+        }
+
+        blocks = new List<GameObject>();
+    }
+
     public void SetBlockList()
     {
+        if(blocks.Count > 0)
+        {
+            foreach (GameObject block in blocks)
+            {
+                Destroy(block);
+            }
+        }
+
+        blocks = new List<GameObject>();
+
         GameObject[] b = GameObject.FindGameObjectsWithTag("Block");
         for (int i = 0; i < b.Length; i++)
         {

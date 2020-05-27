@@ -19,7 +19,7 @@ public class BlockComponent : MonoBehaviour
         if (isWall)
         {
             SetColour(healthColours[0]);
-            gameObject.tag = "Wall";
+            gameObject.tag = "BlockWall";
             if (LevelController.levelController != null)
                 LevelController.levelController.RemoveBlock(gameObject);
             Destroy(this);
