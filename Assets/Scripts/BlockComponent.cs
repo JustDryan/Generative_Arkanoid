@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class BlockComponent : MonoBehaviour
 {
-    public int maxHealth;
-    int health;
-    public SpriteRenderer shading;
-    public Color[] healthColours;
-    float opacity;
-    bool isWall;
+    public int maxHealth; //Maximum health of the block, used on start
+    int health; //Actual/current health of the block
+    public SpriteRenderer shading; //Sprite that overlays a white sprite, using to colour in the blocks. I use two sprites tomake the opacity scale more obvious and (hopefully) conflict less with the background.
+    public Color[] healthColours; //Stores the colours that will represent what health a block is on.
+    float opacity; //Stores how opaque the shading sprite whill be
+    bool isWall; //Checks if the block is a wall, changes it as such in Start
 
     void Start()
     {

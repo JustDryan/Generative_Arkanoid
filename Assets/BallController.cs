@@ -4,21 +4,21 @@ using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
-    public float ballSpeed;
-    public float maxBallSpeed;
-    public float ballSpeedIncrease;
-    float rotZ;
-    float canChangeTime;
+    public float ballSpeed; //How fast the ball is currently moving
+    public float maxBallSpeed; //The maximum speed the ball can go
+    public float ballSpeedIncrease; //How much to increase the speed by
+    float rotZ; //Ball's rotation
+    float coolDownTime; //Tracks the ball's cooldown
 
-    public AudioClip[] clips;
+    public AudioClip[] clips; //Holds collision clips
+    int hitIndex; //Tracks which clip to play
 
-    float prevX;
-    GameObject prevCollision;
+    float prevX; //Used to track the horizontal direction of the ball, updates every frame
+    GameObject prevCollision; //Stores the last thing the ball collided with, used to prevent the ball from getting stuck on objects
 
-    Vector3 spawnPos;
+    Vector3 spawnPos; //Stores the position the ball starts in/will return to
 
-    Rigidbody2D rb;
-    int hitIndex;
+    Rigidbody2D rb; //The rigidbody2D of the ball
 
     void Start()
     {
@@ -72,12 +72,12 @@ public class BallController : MonoBehaviour
 
     public void StartBallCooldown() //The ball has a small coooldown on interacting with an object to prevent it getting stuck on the same object
     {
-        canChangeTime = Time.time + 0.05f;
+        coolDownTime = Time.time + 0.05f;
     }
 
     bool BallOnCooldown() //Checks if the bool is currently on cooldown
     {
-        if (Time.time >= canChangeTime)
+        if (Time.time >= coolDownTime)
             return false;
 
         return true;

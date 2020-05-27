@@ -4,17 +4,17 @@ using UnityEngine;
 
 public class LevelController : MonoBehaviour
 {
-    public static LevelController levelController;
+    public static LevelController levelController; //Level Controller singleton
 
-    public string seed;
+    public string seed; //Seed to generate from
 
-    public Vector2 generateStart;
-    public Vector2 spacing;
+    public Vector2 generateStart; //Position to start generating at (top left)
+    public Vector2 spacing; //Spacing between blocks on x/y
 
-    public GameObject blockPrefab;
+    public GameObject blockPrefab; //Block prefab
 
-    public List<BlockColumn> columns = new List<BlockColumn>();
-    List<GameObject> blocks = new List<GameObject>();
+    public List<BlockColumn> columns = new List<BlockColumn>(); //List of columns, used to mirror
+    List<GameObject> blocks = new List<GameObject>(); //List of destroyable blocks in game, goes down every time a block is destroyed, used to complete game
 
     bool gameOver;
 
@@ -185,8 +185,8 @@ public class LevelController : MonoBehaviour
             print("Yay nice");
         }
 
-        if (Input.GetKeyDown(KeyCode.Space)) //Generate a new level on space press
-            GenerateNewLevel();
+        //if (Input.GetKeyDown(KeyCode.Space)) Generate a new level on space press, used for making my gif
+        //    GenerateNewLevel();
     }
 
     public void CreateColourSet()

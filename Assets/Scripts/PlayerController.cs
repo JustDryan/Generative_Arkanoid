@@ -4,13 +4,12 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float minMaxParams;
-    public float squashAmount;
+    public float minMaxParams; //Bounds of the stage
 
-    float paddleX;
+    float paddleX; //Paddle X scale, will be used for powerups
 
-    Vector3 previousPostion;
-    Transform graphic;
+    Vector3 previousPostion; //Previous position of Paddle, updates at the end of every physics frame
+    Transform graphic; //Parent graphic for paddle, used to squash paddle without altering the collider
 
     void Start()
     {
