@@ -15,10 +15,13 @@ public class LevelController : MonoBehaviour
     public GameObject blockPrefab; //Block prefab
 
     public List<BlockColumn> columns = new List<BlockColumn>(); //List of columns, used to mirror
-    List<GameObject> blocks = new List<GameObject>(); //List of destroyable blocks in game, goes down every time a block is destroyed, used to complete game
+    public List<GameObject> blocks = new List<GameObject>(); //List of destroyable blocks in game, goes down every time a block is destroyed, used to complete game
 
     bool gameStarted;
     bool gameOver;
+
+    float timer;
+    int gameTimer;
 
     [System.Serializable]
     public class BlockColumn //The column class
@@ -180,6 +183,16 @@ public class LevelController : MonoBehaviour
 
     private void Update()
     {
+        if (gameStarted)
+        {
+            if(Time.time >= timer)
+            {
+                gameTimer++;
+                timer = Time.time + 1;
+                GameController.gameController.SetTimerText(gameTimer.ToString());
+            }
+        }
+
         if (blocks.Count == 0 && !gameOver && gameStarted) //If there are no more destroyable blocks (if the block list is empty) and the game isn't over
         {
             gameOver = true; //Prevent extra runs
@@ -207,34 +220,35 @@ public class LevelController : MonoBehaviour
         if(baseColor.r >= baseColor.b && baseColor.r >= baseColor.g) //Steps 2-4 are done here if red is highest
         {
             colors.Add(new Color(baseColor.r, baseColor.b, baseColor.g));
-            if (baseColor.b > baseColor.g)
-            {
-                colors.Add(new Color(baseColor.b, 1 - baseColor.g, baseColor.r));
-                colors.Add(new Color(1 - baseColor.g, baseColor.b, baseColor.r));
-            }
-            else
+            if (baseColor.b >= baseColor.g)
             {
                 colors.Add(new Color(baseColor.g, baseColor.r, 1 - baseColor.b));
                 colors.Add(new Color(1 - baseColor.b, baseColor.r, baseColor.g));
+            }
+            else if (baseColor.b < baseColor.g)
+            {
+                colors.Add(new Color(baseColor.b, 1 - baseColor.g, baseColor.r));
+                colors.Add(new Color(1 - baseColor.g, baseColor.b, baseColor.r));
             }
         }
         else if (baseColor.b >= baseColor.r && baseColor.b >= baseColor.g) //Steps 2-4 are done here if blue is highest
         {
             colors.Add(new Color(baseColor.g, baseColor.r, baseColor.b));
-            if (baseColor.r > baseColor.g)
+            if (baseColor.r >= baseColor.g)
             {
-                colors.Add(new Color(baseColor.g, 1 - baseColor.r, baseColor.b));
-                colors.Add(new Color(1 - baseColor.r, baseColor.g, baseColor.b));
+                colors.Add(new Color(baseColor.g, baseColor.b, 1 - baseColor.r));
+                colors.Add(new Color(1 - baseColor.r, baseColor.b, baseColor.g));
             }
-            else
+            else if(baseColor.r < baseColor.g)
             {
-                colors.Add(new Color(baseColor.r, 1 - baseColor.g,baseColor.b));
-                colors.Add(new Color(1 - baseColor.g, baseColor.r, baseColor.b));
+                colors.Add(new Color(baseColor.b, 1 - baseColor.g, baseColor.r));
+                colors.Add(new Color(baseColor.b, baseColor.r,  1 - baseColor.g));
             }
         }
         else if (baseColor.g >= baseColor.r && baseColor.g >= baseColor.b) //Steps 2-4 are done here if green is highest
         {
-            colors.Add(new Color(baseColor.b, baseColor.r, baseColor.g));
+            colors.Add(new Color(baseColor.b, baseColor.g, baseColor.r));
+
             if (baseColor.b > baseColor.r)
             {
                 colors.Add(new Color(baseColor.g, 1 - baseColor.b, baseColor.r));
@@ -245,6 +259,11 @@ public class LevelController : MonoBehaviour
                 colors.Add(new Color(baseColor.b, 1 -baseColor.r, baseColor.g));
                 colors.Add(new Color(1 - baseColor.r, baseColor.b, baseColor.g));
             }
+        }
+
+        for (int i = 0; i < colors.Count; i++)
+        {
+            print(i + "--" + colors[i].r + ":" + colors[i].g + ":" + colors[i].b);
         }
 
         for (int i = 0; i < colors.Count; i++) //Randomly distributes the colours in the list
@@ -258,6 +277,7 @@ public class LevelController : MonoBehaviour
         Camera.main.backgroundColor = colors[3]; //Sets the background colour
     }
 
+    [ContextMenu("Destroy all block")]
     public void DestroyBlockList()
     {
         if (blocks.Count > 0) //If there are blocks in the list, destroy all blocks
@@ -306,5 +326,13 @@ public class LevelController : MonoBehaviour
     {
         gameStarted = true;
         gameOver = false;
+        ResetTimer();
+    }
+
+    public void ResetTimer()
+    {
+        timer = 1;
+        gameTimer = 0;
+        GameController.gameController.SetTimerText("0");
     }
 }

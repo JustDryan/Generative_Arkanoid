@@ -18,6 +18,8 @@ public class BallController : MonoBehaviour
     Vector3 spawnPos; //Stores the position the ball starts in/will return to
     bool ballPaused;
 
+    bool active;
+
     Rigidbody2D rb; //The rigidbody2D of the ball
 
     void Start()
@@ -37,6 +39,10 @@ public class BallController : MonoBehaviour
 
     public void RespawnBall() //Places the ball back at the spawn point, makes it face downwards and resets collisions
     {
+        if (!active)
+            active = true;
+        else
+            GameController.gameController.AddBallUses(1);
         transform.position = spawnPos;
         SetBallRotation(180);
         prevCollision = null;
@@ -56,11 +62,10 @@ public class BallController : MonoBehaviour
 
     public void SetBallRotation(float rotation) //Sets the rotation of the ball
     {
-        if (!BallOnCooldown())
-            transform.eulerAngles = new Vector3(0, 0, rotation);
+        transform.eulerAngles = new Vector3(0, 0, rotation);
     }
 
-    public void ReflectBall(Vector3 normal, float angleIncrease) //Reflects the ball when it hits a surface, takes the normal from the object hit, and adds/subtracts degrees depending on where it lands on the paddle
+    public void ReflectBall(Vector3 normal, float angleIncrease, bool isPaddleHit) //Reflects the ball when it hits a surface, takes the normal from the object hit, and adds/subtracts degrees depending on where it lands on the paddle
     {
         StartBallCooldown(); //To prevent the ball from getting stuck
         if (ballSpeed < maxBallSpeed) //Checks how fast the ball is going
@@ -71,6 +76,28 @@ public class BallController : MonoBehaviour
 
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg; //Converts this direction to degrees
         transform.eulerAngles = new Vector3(0, 0, angle - f); //Sets the ball angle with the 90 degrees accounted for and angleIncrease added on
+
+        if (isPaddleHit) //Checks if it is a paddle hit
+        {
+            //The lines below simply prevent the ball's angle from going through the paddle after being adjusted. If the angle of the ball would send it horizontal or underneath the paddle, the ball rotation is adjusted.
+
+            if(transform.eulerAngles.z <= -80 && transform.eulerAngles.z >= -180)
+            {
+                SetBallRotation(-80);
+            }
+            else if(transform.eulerAngles.z >= -280 && transform.eulerAngles.z <= -180)
+            {
+                SetBallRotation(-280);
+            }
+            else if (transform.eulerAngles.z >= 80 && transform.eulerAngles.z <= 180)
+            {
+                SetBallRotation(80);
+            }
+            else if (transform.eulerAngles.z <= 280 && transform.eulerAngles.z >= 180)
+            {
+                SetBallRotation(280);
+            }
+        }
     }
 
     public void StartBallCooldown() //The ball has a small coooldown on interacting with an object to prevent it getting stuck on the same object
@@ -117,14 +144,14 @@ public class BallController : MonoBehaviour
 
         if (collision.gameObject.CompareTag("Paddle") && transform.position.y > collision.transform.position.y) //Checks for the Paddle, implements the angle adjustments to ReflectBall
         {
-            ReflectBall(normal, (transform.position.x - collision.transform.position.x) * 20);
+            ReflectBall(normal, (transform.position.x - collision.transform.position.x) * 20, true);
             PlayHitSound();
             prevCollision = collision.gameObject;
         }
 
         if (collision.gameObject.CompareTag("Block")) //Checks for a block, if it is a block, remove 1 health from it
         {
-            ReflectBall(normal, 0);
+            ReflectBall(normal, 0, false);
             collision.gameObject.GetComponent<BlockComponent>().RemoveHealth();
             PlayHitSound();
             prevCollision = collision.gameObject;
@@ -132,21 +159,21 @@ public class BallController : MonoBehaviour
 
         if (collision.gameObject.CompareTag("Wall")) //Check if the ball has hit the bounds of the game
         {
-            ReflectBall(normal, 0);
+            ReflectBall(normal, 0, false);
             PlayHitSound();
             prevCollision = collision.gameObject;
         }
 
         if (collision.gameObject.CompareTag("BlockWall")) //Check if the ball has hit a block that has been turned into a wall
         {
-            ReflectBall(normal, 0);
+            ReflectBall(normal, 0, false);
             PlayHitSound();
             prevCollision = collision.gameObject;
         }
 
         if (collision.gameObject.CompareTag("Ball")) //For power-ups, checks if the ball hits another ball
         {
-            ReflectBall(normal, 0);
+            ReflectBall(normal, 0, false);
             PlayHitSound();
             prevCollision = collision.gameObject;
         }

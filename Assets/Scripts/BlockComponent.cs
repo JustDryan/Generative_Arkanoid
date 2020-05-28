@@ -30,11 +30,13 @@ public class BlockComponent : MonoBehaviour
     {
         health--; //Removes health from the block
         SetColour(healthColours[health]); //Changes the colour to suit the damage, opactiy is the same
+        GameController.gameController.AddPoints(100);
 
         if (health <= 0) //If the block has run out of health
         {
             if (LevelController.levelController != null)
                 LevelController.levelController.RemoveBlock(gameObject); //Removes the block from the list of blocks the player needs to destroy
+            GameController.gameController.AddPoints(100 * maxHealth);
             Destroy(gameObject); //Destroys the object
         }
     }

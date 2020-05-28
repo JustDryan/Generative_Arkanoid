@@ -7,16 +7,22 @@ public class GameController : MonoBehaviour
 {
     public static GameController gameController;
 
+    [Header("Game Info")]
     public GameObject ballPrefab;
     public Transform ballSpawn;
     GameObject blockPrefab;
+    public List<GameObject> balls = new List<GameObject>();
 
+    [Header("Menu Screen")]
     public GameObject mainMenu;
     public Transform playButton, seedButton;
     public InputField seedInput;
     public Text currentSeed;
 
-    public List<GameObject> balls = new List<GameObject>();
+    [Header("Game Screen")]
+    public GameObject gameScreen;
+    public Text scoreText, timerText, ballText;
+    public int score, ballCount;
 
     void Start()
     {
@@ -31,10 +37,12 @@ public class GameController : MonoBehaviour
     void SceneStart()
     {
         blockPrefab = LevelController.levelController.blockPrefab;
-        LevelController.levelController.GenerateNewLevel(); //Generates a new set of blocks
+        LevelController.levelController.GenerateNewLevel();
         SetButtonColours(playButton);
         SetButtonColours(seedButton);
         DisplayNewSeed();
+        SetMenuActive(true);
+        SetGameScreenActive(false);
     }
 
     public void FinishGame()
@@ -54,8 +62,11 @@ public class GameController : MonoBehaviour
         CycleLevel();
         FindObjectOfType<PlayerController>().SetPaddleActive(false);
         FindObjectOfType<PlayerController>().transform.position = new Vector2(0, FindObjectOfType<PlayerController>().transform.position.y);
-        mainMenu.SetActive(true);
+        LevelController.levelController.ResetTimer();
+        ResetBallUses();
+        SetMenuActive(true);
         Cursor.visible = true;
+        ResetScore();
 
     }
 
@@ -80,7 +91,8 @@ public class GameController : MonoBehaviour
         SpawnNewBall();
         LevelController.levelController.StartGame();
         FindObjectOfType<PlayerController>().SetPaddleActive(true);
-        mainMenu.SetActive(false);
+        SetMenuActive(false);
+        SetGameScreenActive(true);
     }
 
     public void ChangeSeed()
@@ -99,10 +111,50 @@ public class GameController : MonoBehaviour
             currentSeed.text = LevelController.levelController.randomSeed;
     }
 
+    public void SetTimerText(string t)
+    {
+        timerText.text = t;
+    }
+
     public void SpawnNewBall()
     {
         Transform b = Instantiate(ballPrefab, ballSpawn).transform; //Spawn the ball
         b.SetParent(null);
         balls.Add(b.gameObject);
     }
+
+    public void AddPoints(int i)
+    {
+        score += i;
+        scoreText.text = score.ToString();
+    }
+
+    public void ResetScore()
+    {
+        score = 0;
+        scoreText.text = score.ToString();
+    }
+
+    public void AddBallUses(int i)
+    {
+        ballCount += i;
+        ballText.text = ballCount.ToString();
+    }
+
+    public void ResetBallUses()
+    {
+        ballCount = 0;
+        ballText.text = ballCount.ToString();
+    }
+
+    void SetMenuActive(bool b)
+    {
+        mainMenu.SetActive(b);
+    }
+
+    void SetGameScreenActive(bool b)
+    {
+        gameScreen.SetActive(b);
+    }
+
 }
